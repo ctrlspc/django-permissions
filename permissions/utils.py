@@ -194,14 +194,19 @@ def get_roles(user, obj=None):
     **Parameters:**
 
     user
-        The user for which the roles are returned.
+        The user for which the roles are returned. You can also pass in a group
+        to get the roles for just this group
 
     obj
         The object for which local roles will returned.
 
     """
     roles = []
-    groups = user.groups.all()
+    
+    if isinstance(user, Group):#if a groupis passed in not a single user
+        groups=[user]
+    else:
+        groups = user.groups.all()
     groups_ids_str = ", ".join([str(g.id) for g in groups])
     groups_ids_str = groups_ids_str  or "''"
 
