@@ -370,9 +370,7 @@ def has_permission(obj, user, codename, roles=None):
     """
     ct = ContentType.objects.get_for_model(obj)
     cache_key = "%s-%s-%s" % (ct, obj.id, codename)
-    result = _get_cached_permission(user, cache_key)
-    if result is not None:
-        return result
+    
 
     if roles is None:
         roles = []
@@ -382,7 +380,7 @@ def has_permission(obj, user, codename, roles=None):
 
     if not user.is_anonymous():
         roles.extend(get_roles(user, obj))
-
+    
     result = False
     while obj is not None:
         p = ObjectPermission.objects.filter(
@@ -403,7 +401,7 @@ def has_permission(obj, user, codename, roles=None):
             result = False
             break
 
-    _cache_permission(user, cache_key, result)
+    
     return result
 
 # Inheritance ################################################################
@@ -635,36 +633,5 @@ def unregister_group(name):
     group.delete()
     return True
 
-def _cache_permission(user, cache_key, data):
-    """Stores the passed data on the passed user object.
 
-    **Parameters:**
 
-    user
-        The user on which the data is stored.
-
-    cache_key
-        The key under which the data is stored.
-
-    data
-        The data which is stored.
-    """
-    if not getattr(user, "permissions", None):
-        user.permissions = {}
-    user.permissions[cache_key] = data
-
-def _get_cached_permission(user, cache_key):
-    """Returns the stored data from passed user object for passed cache_key.
-
-    **Parameters:**
-
-    user
-        The user from which the data is retrieved.
-
-    cache_key
-        The key under which the data is stored.
-
-    """
-    permissions = getattr(user, "permissions", None)
-    if permissions:
-        return user.permissions.get(cache_key, None)
