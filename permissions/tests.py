@@ -14,6 +14,7 @@ from permissions.models import ObjectPermissionInheritanceBlock
 from permissions.models import Role
 
 import permissions.utils
+from permissions.utils import add_local_role, add_role
 
 class BackendTestCase(TestCase):
     """
@@ -465,6 +466,23 @@ class RoleTestCase(TestCase):
         self.assertEqual(result[1].username, "jane")
         self.assertEqual(len(result), 2)
 
+    def test_get_local_users(self):
+        '''
+            This function which requires you to provide an object
+            for the content, returns a list of users who are local
+            members of this role for this content.
+        '''
+        
+        #if the object has no local roles returns empty list
+        self.assertEqual([], self.role_1.get_local_users(self.page_1))
+        
+        #if the object has a local role with a user return a list containing that user
+        self.user_2 = User.objects.create(username="jane")
+        self.user_2.save()
+        add_local_role(self.page_1, self.user, self.role_1)
+        add_role(self.user_2, self.role_2)
+        self.assertEqual([self.user], self.role_1.get_local_users(self.page_1))
+        
 class PermissionTestCase(TestCase):
     """
     """

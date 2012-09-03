@@ -150,6 +150,19 @@ class Role(models.Model):
                 content_id=None, content_type=None).exclude(user=None)
 
         return [prr.user for prr in prrs]
+    
+    def get_local_users(self, content):
+        '''
+            Returns the users that are local members of the role for the 
+            given content object
+        '''
+        ctype = ContentType.objects.get_for_model(content)
+        
+        prrs = PrincipalRoleRelation.objects.filter(role=self,
+                content_id = content.id,
+                content_type = ctype).exclude(user=None)
+
+        return [prr.user for prr in prrs]
 
 class PrincipalRoleRelation(models.Model):
     """A role given to a principal (user or group). If a content object is
