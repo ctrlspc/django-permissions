@@ -15,6 +15,7 @@ from permissions.models import ObjectPermissionInheritanceBlock
 from permissions.models import Permission
 from permissions.models import PrincipalRoleRelation
 from permissions.models import Role
+from locale import str
 
 
 # Roles ######################################################################
@@ -506,6 +507,20 @@ def get_user(id):
     except User.DoesNotExist:
         return None
 
+def get_object_for_principle_as_role(principle, role):
+    '''
+        Returns all the objects for which the principle is a member of the role for
+    '''
+    
+    if isinstance(role, str):
+        role = Role.objects.get(name=role)
+        
+        
+    principle_role_relations = PrincipalRoleRelation.objects.filter(user=principle, role=role)
+    
+    return [relation.content for relation in principle_role_relations]
+    
+    
 def has_group(user, group):
     """Returns True if passed user has passed group.
     """

@@ -742,7 +742,13 @@ class RegistrationTestCase(TestCase):
         # Unregister the permission again
         result = permissions.utils.unregister_permission("change")
         self.assertEqual(result, False)
-
+class UtilsTestCase(TestCase):
+    
+    def test_get_object_for_principle_as_role(self):
+        '''
+        
+        '''
+        self.assertTrue(False)
 # django imports
 from django.core.handlers.wsgi import WSGIRequest
 from django.contrib.auth.models import User
