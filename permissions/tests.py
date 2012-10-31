@@ -14,7 +14,8 @@ from permissions.models import ObjectPermissionInheritanceBlock
 from permissions.models import Role
 
 import permissions.utils
-from permissions.utils import add_local_role, add_role
+from permissions.utils import add_local_role, add_role,\
+    get_object_for_principle_as_role
 
 class BackendTestCase(TestCase):
     """
@@ -742,13 +743,63 @@ class RegistrationTestCase(TestCase):
         # Unregister the permission again
         result = permissions.utils.unregister_permission("change")
         self.assertEqual(result, False)
+        
+        
 class UtilsTestCase(TestCase):
     
-    def test_get_object_for_principle_as_role(self):
+    def setUp(self):        
+        self.tester_role = Role.objects.create(name='testRole')
+        self.test_principle = User.objects.create_user('test', 'testpass', 'me@home.com')
+        
+    def test_get_object_for_principle_as_role_local(self):
         '''
+            If the principle is a member of a local role for a given object then
+            this object should be returned.
+            
+            This test is difficult to do:
+            1. You need to have a model to test against
+                can we use one of the models that the permissions package defines?
+            
+        '''
+        an_object = Permission.objects.create(name='an_object', codename='an_object')
+        add_local_role(an_object, self.test_principle, self.tester_role)
+        
+        another_object = Permission.objects.create(name='another_object', codename='another_object')
+        add_local_role(another_object, self.test_principle, self.tester_role)
+        
+        objects = get_object_for_principle_as_role(principle=self.test_principle, principle_role=self.tester_role)
+        
+        self.assertTrue(an_object in objects)
+        self.assertTrue(another_object in objects)
+   
+    def test_get_object_for_principle_as_role_string_role(self):
+        '''
+            If you specify a string instead of a role then this function should
+            look up the role using the sting as the role name
         
         '''
-        self.assertTrue(False)
+        an_object = Permission.objects.create(name='an_object', codename='an_object')
+        add_local_role(an_object, self.test_principle, self.tester_role)
+        
+        another_object = Permission.objects.create(name='another_object', codename='another_object')
+        add_local_role(another_object, self.test_principle, self.tester_role)
+        
+        objects = get_object_for_principle_as_role(principle=self.test_principle, principle_role='testRole')
+        
+        self.assertTrue(an_object in objects)
+        self.assertTrue(another_object in objects)
+        
+        
+    def test_get_object_for_principle_as_role_none(self):
+        
+        '''
+            If the principle is a not a member of any roles then an empty list should be
+            returned.
+        '''
+        objects = get_object_for_principle_as_role(principle=self.test_principle, principle_role=self.tester_role)
+        self.assertEqual(objects, [])
+        
+        
 # django imports
 from django.core.handlers.wsgi import WSGIRequest
 from django.contrib.auth.models import User
