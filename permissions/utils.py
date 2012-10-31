@@ -507,16 +507,16 @@ def get_user(id):
     except User.DoesNotExist:
         return None
 
-def get_object_for_principle_as_role(principle, role):
+def get_object_for_principle_as_role(principle, principle_role):
     '''
         Returns all the objects for which the principle is a member of the role for
     '''
     
-    if isinstance(role, str):
-        role = Role.objects.get(name=role)
+    if isinstance(principle_role, type('')):#not sure why but if you use str here you get an error?!?!
+        principle_role = Role.objects.get(name=principle_role)
         
         
-    principle_role_relations = PrincipalRoleRelation.objects.filter(user=principle, role=role)
+    principle_role_relations = PrincipalRoleRelation.objects.filter(user=principle, role=principle_role)
     
     return [relation.content for relation in principle_role_relations]
     
